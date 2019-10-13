@@ -20,11 +20,11 @@ typedef enum eRelay
   eRELAY_COUNT
 }eRELAY;
 
-typedef struct RelayConfig
+typedef struct xRelayConfig
 {
   uint8 u8enablePin;
   uint8 u8triggerPin;
-}RELAY_CONFIG;
+}xRELAY_CONFIG;
 
 RELAY_CONFIG gxLookUpRelayConfig[eRELAY_COUNT]
 {
@@ -224,17 +224,17 @@ unsigned char getEnabledMask(void)
 {
   int i;
   unsigned char enabledMask = 0;
-  
-  for (int i = 0; i < NUM_OF_RELAYS; i++)
+
+  eRELAY eWhichRelay = (eRELAY) 0;
+
+  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT ; eWhichRelay++ )
   {
-    if (digitalRead(RelayPins[i][1]) == HIGH)
+    if( digitalRead( eWhichRelay.u8EnablePin == HIGH ) )
     {
-      enabledMask |= (1 << i);
-      Serial.println(i);
+      enabledMask |= ( 1 << i );
+      Serial.println( eWhichRelay );
     }
   }
-
-  
 
   return enabledMask;
 }
