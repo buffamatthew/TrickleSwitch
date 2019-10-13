@@ -22,8 +22,8 @@ typedef enum eRelay
 
 typedef struct xRelayConfig
 {
-  uint8 u8EnablePin;
-  uint8 u8TriggerPin;
+  const uint8 u8EnablePin;
+  const uint8 u8TriggerPin;
 }xRELAY_CONFIG;
 
 static xRELAY_CONFIG gxLookUpRelayConfig[eRELAY_COUNT]
@@ -83,15 +83,7 @@ const unsigned char RelayPins [NUM_OF_RELAYS][2] =
 
 void setup() 
 {
-  pinMode(RELAY_K1_PIN, OUTPUT);
-  pinMode(RELAY_K2_PIN, OUTPUT);
-  pinMode(RELAY_K3_PIN, OUTPUT);
-  pinMode(RELAY_K4_PIN, OUTPUT);
-
-  pinMode(RELAY_K1_PIN_EN_PIN,INPUT);
-  pinMode(RELAY_K2_PIN_EN_PIN,INPUT);
-  pinMode(RELAY_K3_PIN_EN_PIN,INPUT);
-  pinMode(RELAY_K4_PIN_EN_PIN,INPUT);
+  vInitializeRelays();
 
   pinMode(PERIOD_POT_PIN,INPUT);
 
@@ -269,4 +261,17 @@ unsigned long getSwitchPeriod (void)
   {
     return MIN_TO_MS(60U * dipSwitchInput);
   }
+}
+
+static void vInitializeRelays( void )
+{
+  eRELAY eWhichRelay;
+  
+  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT; eWhichRelay + 1U )
+  {
+    pinMode( gxLookUpRelayConfig[eWhichRelay].u8EnablePin, INPUT );
+    pinMode( gxLookUpRelayConfig[eWhichRelay].u8TriggerPin, OUTPUT );
+  }
+
+  return;
 }
