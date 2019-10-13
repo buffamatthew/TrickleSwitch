@@ -181,17 +181,20 @@ void updateOutputs( void )
           startTimeStamps[RELAY_K1] = millis();
         break;
 
+
         case( RELAY_K2_ON ):
           Serial.println( "K2 ON " );
           digitalWrite( RELAY_K2_PIN,CHARGER_CONNECTED );
           startTimeStamps[RELAY_K2] = millis();
         break;
+        
 
         case( RELAY_K3_ON ):
           Serial.println( "K3 ON " );
           digitalWrite( RELAY_K3_PIN,CHARGER_CONNECTED );
           startTimeStamps[RELAY_K3] = millis();
         break;
+        
 
         case( RELAY_K4_ON ):
           Serial.println( "K4 ON " );
