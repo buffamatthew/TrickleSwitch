@@ -22,16 +22,16 @@ typedef enum eRelay
 
 typedef struct xRelayConfig
 {
-  uint8 u8enablePin;
-  uint8 u8triggerPin;
+  uint8 u8EnablePin;
+  uint8 u8TriggerPin;
 }xRELAY_CONFIG;
 
-RELAY_CONFIG gxLookUpRelayConfig[eRELAY_COUNT]
+static xRELAY_CONFIG gxLookUpRelayConfig[eRELAY_COUNT]
 {
   { 10U, 2U }, //eRELAY_K1
   { 11U, 3U }, //eRELAY_K2
   { 12U, 4U }, //eRELAY_K3
-  { 13U, 5U } //eRELAY_K4
+  { 13U, 5U }  //eRELAY_K4
 };
 
 #define PERIOD_POT_PIN 0U
@@ -225,11 +225,11 @@ unsigned char getEnabledMask(void)
   int i;
   unsigned char enabledMask = 0;
 
-  eRELAY eWhichRelay = (eRELAY) 0;
+  eRELAY eWhichRelay;
 
-  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT ; eWhichRelay++ )
+  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT; eWhichRelay + 1U )
   {
-    if( digitalRead( eWhichRelay.u8EnablePin == HIGH ) )
+    if( digitalRead( gxLookUpRelayConfig[eWhichRelay].u8EnablePin == HIGH ) )
     {
       enabledMask |= ( 1 << i );
       Serial.println( eWhichRelay );
