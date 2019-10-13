@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module fritzingVersion="0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806" icon="Search.png" search="screw terminal">
+    <title>Search</title>
+    <instances>
+        <instance moduleIdRef="Arduino_bt07" modelIndex="25687" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Arduino_bt07.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-8_5_08mm_pitch_90deg_terminals" modelIndex="25689" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-8_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Power Screwshield 1.0a" modelIndex="25691" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Power Screwshield 1.0a.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screw_terminal_2_300mil" modelIndex="25692" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/screw_terminal_2_300mil.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="SparkFun-Connectors-M04-SCREW_LOCK" modelIndex="25694" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/sparkfun-connectors-m04-screw_lock.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="SparkFun-Connectors-M02-3.5MM_LOCK" modelIndex="25696" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/sparkfun-connectors-m02-3.5mm_lock.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-4_5_08mm_pitch_90deg_terminals" modelIndex="25698" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-4_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-11_5_08mm_pitch_90deg_terminals" modelIndex="25699" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-11_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screw_terminal_2_100mil" modelIndex="25701" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/screw_terminal_2_100mil.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-7_5_08mm_pitch_90deg_terminals" modelIndex="25703" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-7_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screw_terminal_2_3.5mm" modelIndex="25705" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/screw_terminal_2_3.5mm.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Ardumoto v13" modelIndex="25706" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Ardumoto v13.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screwshield-v15" modelIndex="25707" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/screwshield-v15.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="PowerDriver-Shield-v13" modelIndex="25709" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/PowerDriver-Shield-v13.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-3_5_08mm_pitch_90deg_terminals" modelIndex="25711" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-3_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-10_5_08mm_pitch_90deg_terminals" modelIndex="25713" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-10_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="SparkFun_Soil_Moisture_Sensor" modelIndex="25715" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/SparkFun_Soil_Moisture_Sensor.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Rotoshield-1.0a" modelIndex="25717" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Rotoshield-1.0a.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-6_5_08mm_pitch_90deg_terminals" modelIndex="25719" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-6_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-9_5_08mm_pitch_90deg_terminals" modelIndex="25721" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-9_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screw_terminal_2_200mil" modelIndex="25723" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/screw_terminal_2_200mil.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="MonsterMoto-Shield-v12" modelIndex="25725" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/MonsterMoto-Shield-v12.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-2_5_08mm_pitch_90deg_terminals" modelIndex="25727" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-2_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-5_5_08mm_pitch_90deg_terminals" modelIndex="25729" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-5_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="SparkFun-Connectors-M03-SCREW_LOCK" modelIndex="25731" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/sparkfun-connectors-m03-screw_lock.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="Camdenboss_CTB0158-12_5_08mm_pitch_90deg_terminals" modelIndex="25733" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/Camdenboss_CTB0158-12_5_08mm_pitch_90deg_terminals.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="IRF520_mos_module_7115327c8b8b62b1ba195a98bd66e077_5" modelIndex="25735" path="/Applications/Fritzing.app/Contents/MacOS/fritzing-parts/core/IFR520_MOS_module.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="screw_terminal_4_100mil_hs_1.5mm_0.508mm" modelIndex="25737" path="/Users/matthewbuffa/.config/Fritzing/partfactory/17cb4ca7baa71fac08d53941c1e96fc8/core/screw_terminal_4_100mil_hs_1.5mm_0.508mm.fzp">
+            <views/>
+        </instance>
+    </instances>
+</module>
