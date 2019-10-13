@@ -100,7 +100,6 @@ void setup( void )
 
 void loop( void ) 
 {
-
   currentTime = millis();
   switchPeriod = getSwitchPeriod();
 
@@ -204,6 +203,7 @@ void updateOutputs( void )
       }
       
     }
+    
     return;
   }
 }
@@ -212,7 +212,6 @@ unsigned char getEnabledMask( void )
 {
   int i;
   unsigned char enabledMask = 0;
-
   eRELAY eWhichRelay;
 
   for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT; eWhichRelay + 1U )
@@ -241,7 +240,6 @@ unsigned long getTimeDifference( unsigned long t0, unsigned long t1 )
 
 unsigned long getSwitchPeriod( void )
 {
-
   unsigned char dipSwitchInput = 0;
   
   dipSwitchInput |= ( digitalRead( DIPSWITCH_PIN_B3 ) << 3 );
