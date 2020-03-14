@@ -1,14 +1,9 @@
-#include "types.h"
-
+#define CHARGER_CONNECTED ( LOW )
+#define CHARGER_DISCONNECTED ( HIGH )
 #define MIN_TO_MS( X ) ( X * 1000UL * 60UL )
 #define SEC_TO_MS( X ) ( X * 1000UL )
 #define SWITCH_PERIOD SEC_TO_MS( 5UL )
-
-#define NUM_OF_RELAYS 4U
-#define RELAY_K1_PIN  2U
-#define RELAY_K2_PIN  3U
-#define RELAY_K3_PIN  4U
-#define RELAY_K4_PIN  5U
+//#define DEBUG
 
 typedef enum eRelay
 {
@@ -22,251 +17,200 @@ typedef enum eRelay
 
 typedef struct xRelayConfig
 {
-  const uint8 u8EnablePin;
-  const uint8 u8TriggerPin;
+  const unsigned char u8EnablePin;
+  const unsigned char u8OutputPin;
 }xRELAY_CONFIG;
 
 static xRELAY_CONFIG gxLookUpRelayConfig[eRELAY_COUNT]
 {
-  { 10U, 2U }, //eRELAY_K1
-  { 11U, 3U }, //eRELAY_K2
-  { 12U, 4U }, //eRELAY_K3
-  { 13U, 5U }  //eRELAY_K4
-};
-#define RELAY_K1_PIN_EN_PIN 10U
-#define RELAY_K2_PIN_EN_PIN 11U
-#define RELAY_K3_PIN_EN_PIN 12U
-#define RELAY_K4_PIN_EN_PIN 13U
-
-#define DIPSWITCH_PIN_B0 6U
-#define DIPSWITCH_PIN_B1 7U
-#define DIPSWITCH_PIN_B2 8U
-#define DIPSWITCH_PIN_B3 9U
-
-#define CHARGER_CONNECTED LOW
-#define CHARGER_DISCONNECTED HIGH
-
-#define RELAY_K1_ON ( 1 << 0U )
-#define RELAY_K2_ON ( 1 << 1U )
-#define RELAY_K3_ON ( 1 << 2U ) 
-#define RELAY_K4_ON ( 1 << 3U )
-
-unsigned long getTimeDifference( unsigned long t0, unsigned long t1 );
-unsigned char getEnabledMask( void );
-void updateOutputs( unsigned char outputStateMask );
-static void vInitializeRelays( void );
-
-typedef enum relays
-{
-  RELAY_K1,
-  RELAY_K2,
-  RELAY_K3,
-  RELAY_K4
+  { 10U, 6U }, //eRELAY_K1
+  { 11U, 7U }, //eRELAY_K2
+  { 12U, 8U }, //eRELAY_K3
+  { 13U, 9U }  //eRELAY_K4
 };
 
-unsigned char outputStateMask;
-unsigned long startTimeStamps[NUM_OF_RELAYS];
-unsigned long timeSincePowerUp = 1;
-unsigned long timeDifference;
-unsigned long currentTime;
-unsigned long switchPeriod;
-
-const unsigned char RelayPins [NUM_OF_RELAYS][2] = 
+typedef enum eDipSwitchPins
 {
-  {RELAY_K1_PIN,RELAY_K1_PIN_EN_PIN},
-  {RELAY_K2_PIN,RELAY_K2_PIN_EN_PIN},
-  {RELAY_K3_PIN,RELAY_K3_PIN_EN_PIN},
-  {RELAY_K4_PIN,RELAY_K4_PIN_EN_PIN}
+  eDIP_SWITCH_PIN_B0,
+  eDIP_SWITCH_PIN_B1,
+  eDIP_SWITCH_PIN_B2,
+  eDIP_SWITCH_PIN_B3,
+  eDIP_SWITCH_PIN_COUNT
+}eDIP_SWITCH_PINS;
+
+static unsigned char gxLookUpDipSwitchConfig[eDIP_SWITCH_PIN_COUNT]
+{
+  2U, // eDIP_SWITCH_PIN_B0
+  3U, // eDIP_SWITCH_PIN_B1
+  4U, // eDIP_SWITCH_PIN_B2
+  5U  // eDIP_SWITCH_PIN_B2
 };
 
-void setup( void ) 
-{
-  vInitializeRelays();
+static unsigned long gulCurrentTime;
+static unsigned long gulSwitchPeriod;
+static unsigned long gulTimeOfLastSwitch = 0;
 
-  /*Time selector pins*/
-  pinMode( DIPSWITCH_PIN_B0, INPUT );
-  pinMode( DIPSWITCH_PIN_B1, INPUT );
-  pinMode( DIPSWITCH_PIN_B2, INPUT );
-  pinMode( DIPSWITCH_PIN_B3, INPUT );
-  
-  digitalWrite( RELAY_K1_PIN,CHARGER_CONNECTED );
-  
-  Serial.println( "K1 ON" );
-  startTimeStamps[RELAY_K1] = millis();
-  outputStateMask = RELAY_K1_ON;
-  
+static unsigned int i = 0;
+
+static unsigned char gu8CurrentSwitchState;
+static unsigned char gu8LastSwitchState;
+static unsigned char gu8LastRelayOn = eRELAY_COUNT;
+
+static void vTurnOfAllRelays(void);
+static unsigned char u8GetEnableSwitchState(void);
+static unsigned long ulGetSwitchPeriodMs( void );
+static void vTurnOffAllRelays(void);
+
+void setup() 
+{
+#ifdef DEBUG
   Serial.begin( 9600 );
+#endif
+
+  // put your setup code here, to run once:
+  unsigned int i;
+
+  for( i = 0; i < eRELAY_COUNT; i++ )
+  {
+    //initialize all relay enable switch (inputs) and outputs
+    pinMode( gxLookUpRelayConfig[i].u8EnablePin, INPUT );
+    pinMode( gxLookUpRelayConfig[i].u8OutputPin, OUTPUT );
+    digitalWrite( gxLookUpRelayConfig[i].u8OutputPin, CHARGER_DISCONNECTED );
+  }
+
+  for( i = 0; i < eDIP_SWITCH_PIN_COUNT; i++ )
+  {
+    pinMode( gxLookUpDipSwitchConfig[i], INPUT );
+  }
+
+  gu8CurrentSwitchState = 0xFF;
+  
+  gu8LastSwitchState = 0;
+  // initialize gu8LastSwitchState to 0 so that if one the first loop through, the switch state
+  // is anything but 0, the output will change immediatley
 }
 
-void loop( void ) 
+unsigned char u8GetEnableSwitchState( void )
 {
-  currentTime = millis();
-  switchPeriod = getSwitchPeriod();
+  unsigned int i;
+  unsigned char u8EnabledMask = 0;
 
-  //Serial.println(switchPeriod);
-  
-  switch ( outputStateMask )
+  for( i = 0; i < eRELAY_COUNT; i++ )
+  {
+    if( digitalRead( gxLookUpRelayConfig[i].u8EnablePin ) == HIGH )
     {
-      case( RELAY_K1_ON ):
-        timeDifference = getTimeDifference( startTimeStamps[RELAY_K1], currentTime );
-        
-        if( timeDifference >= switchPeriod )
-        {
-          digitalWrite( RELAY_K1_PIN,CHARGER_DISCONNECTED ) ;
-          startTimeStamps[RELAY_K1] = 0;
-          updateOutputs();
-        }
-      break;
-      
-      case ( RELAY_K2_ON ):
-        timeDifference = getTimeDifference( startTimeStamps[RELAY_K2], currentTime );
-
-        if( timeDifference >= switchPeriod )
-        {
-          digitalWrite( RELAY_K2_PIN,CHARGER_DISCONNECTED );
-          startTimeStamps[RELAY_K2] = 0;
-          updateOutputs();
-        }
-      break;
-  
-      case( RELAY_K3_ON ):
-        timeDifference = getTimeDifference( startTimeStamps[RELAY_K3], currentTime );
-        
-        if ( timeDifference >= switchPeriod )
-        {
-          digitalWrite( RELAY_K3_PIN,CHARGER_DISCONNECTED );
-          startTimeStamps[RELAY_K3] = 0;
-          updateOutputs();
-        }
-      break;
-  
-      case( RELAY_K4_ON ):
-        timeDifference = getTimeDifference( startTimeStamps[RELAY_K4], currentTime );
-        
-        if( timeDifference >= switchPeriod )
-        {
-          digitalWrite( RELAY_K4_PIN,CHARGER_DISCONNECTED );
-          startTimeStamps[RELAY_K4] = 0;
-          updateOutputs();
-        }
-        
-      break;
+      u8EnabledMask |= ( 1 << (int)(i) );
     }
+  }
+  
+  return u8EnabledMask;
 }
-  
-void updateOutputs( void )
+
+void loop() 
 {
-  unsigned char enabledMask;
-  enabledMask = getEnabledMask();
-  
-  while( 1 )
-  {  
-    if( ( outputStateMask << 1 ) <=  RELAY_K4_ON )
+  gu8CurrentSwitchState = u8GetEnableSwitchState();
+
+  if( gu8CurrentSwitchState != gu8LastSwitchState ) // handles sudden changes of 0 relays enabled to some enabled, or some enabled to 0 enabled.. don't want to wait for time to expire
+  {
+    // switch state just changed
+    
+    if( 0U == gu8CurrentSwitchState )
     {
-      outputStateMask = ( outputStateMask << 1 );
+      // changing from at least 1 relay enabled to 0 relays enabled
+      vTurnOffAllRelays();
     }
-    else
+    else if( 0U == gu8LastSwitchState )
     {
-      outputStateMask = 1;
-    }
-        
-    if( ( outputStateMask & enabledMask ) != 0)
-    {
-      switch( outputStateMask )
+      // changing from 0 relays enabled to at least 1 relay enabled..
+      for( unsigned int i = 0; i < eRELAY_COUNT; i++ ) // just find the first relay enabled and turn it on
       {
-        case( RELAY_K1_ON ):
-          Serial.println( "K1 ON " );
-          digitalWrite( RELAY_K1_PIN,CHARGER_CONNECTED );
-          startTimeStamps[RELAY_K1] = millis();
-        break;
+        if( digitalRead( gxLookUpRelayConfig[ i ].u8EnablePin ) == HIGH )
+        {
+          digitalWrite( gxLookUpRelayConfig[ i ].u8OutputPin, CHARGER_CONNECTED ); // all relays previously off, so don't need to turn any off
+          gu8LastRelayOn = i;
 
+#ifdef DEBUG
+          Serial.print("Relay ON = " );
+          Serial.println( gu8LastRelayOn );
+#endif          
+          gulTimeOfLastSwitch = millis();
+          break;
+        }
+      }
+    }
+    
+    gu8LastSwitchState = gu8CurrentSwitchState;
+  }
+  
+  if( ( millis() - gulTimeOfLastSwitch ) >= ulGetSwitchPeriodMs() ) // handles periodic switching
+  {
+    // time to switch
+    gulTimeOfLastSwitch = millis();
 
-        case( RELAY_K2_ON ):
-          Serial.println( "K2 ON " );
-          digitalWrite( RELAY_K2_PIN,CHARGER_CONNECTED );
-          startTimeStamps[RELAY_K2] = millis();
-        break;
+#ifdef DEBUG
+    Serial.println( "Checking if we need to switch" );
+#endif          
+    
+    i = 0;
+    while( i < ( eRELAY_COUNT - 1) )
+    {
+      if( digitalRead( gxLookUpRelayConfig[ ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT ].u8EnablePin ) == HIGH ) // loops through the last relay off + 1 (next relay in sequence) to find which one to turn on next
+      {
+        vTurnOffAllRelays();
         
-
-        case( RELAY_K3_ON ):
-          Serial.println( "K3 ON " );
-          digitalWrite( RELAY_K3_PIN,CHARGER_CONNECTED );
-          startTimeStamps[RELAY_K3] = millis();
-        break;
+        digitalWrite( gxLookUpRelayConfig[ ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT ].u8OutputPin, CHARGER_CONNECTED );
         
+        gu8LastRelayOn = ( ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT );
 
-        case( RELAY_K4_ON ):
-          Serial.println( "K4 ON " );
-          digitalWrite( RELAY_K4_PIN,CHARGER_CONNECTED );
-          startTimeStamps[RELAY_K4] = millis();
+#ifdef DEBUG
+        Serial.print("Relay ON = " );
+        Serial.println( gu8LastRelayOn );
+#endif          
         break;
       }
       
-    }
-    
-    return;
-  }
-}
-
-unsigned char getEnabledMask( void )
-{
-  int i;
-  unsigned char enabledMask = 0;
-  eRELAY eWhichRelay;
-
-  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT; eWhichRelay + 1U )
-  {
-    if( digitalRead( gxLookUpRelayConfig[eWhichRelay].u8EnablePin == HIGH ) )
-    {
-      enabledMask |= ( 1 << i );
-      Serial.println( eWhichRelay );
+      i++;
     }
   }
 
-  return enabledMask;
+  delay(100);
 }
 
-unsigned long getTimeDifference( unsigned long t0, unsigned long t1 )
-{
-  if( t1 >= t0 )
-  {
-    return ( t1 - t0 );
-  }
-  else //just rolled over
-  {
-    return ( ( 4294967295 - t0 ) + t1 );
-  }
-}
-
-unsigned long getSwitchPeriod( void )
+unsigned long ulGetSwitchPeriodMs( void )
 {
   unsigned char dipSwitchInput = 0;
+  unsigned int i;
   
-  dipSwitchInput |= ( digitalRead( DIPSWITCH_PIN_B3 ) << 3 );
-  dipSwitchInput |= ( digitalRead( DIPSWITCH_PIN_B2 ) << 2 );
-  dipSwitchInput |= ( digitalRead( DIPSWITCH_PIN_B1 ) << 1 );
-  dipSwitchInput |= digitalRead( DIPSWITCH_PIN_B0 );
+  for( i = 0; i < eDIP_SWITCH_PIN_COUNT; i++ )
+  {
+    dipSwitchInput |= ( digitalRead( gxLookUpDipSwitchConfig[i] ) << i );
+  }
   
   if( dipSwitchInput == 0 )
   {
-    return SEC_TO_MS( 1U );
+    return SEC_TO_MS( 1U ); // test mode.. dip switch is set to 0, set to 1 second period
   }
   else
   {
+    
+#ifdef DEBUG
+    return SEC_TO_MS( 1U * dipSwitchInput ); // an hour is too long to wait for debugging
+#else
     return MIN_TO_MS( 60U * dipSwitchInput );
+#endif
   }
 }
 
-static void vInitializeRelays( void )
+static void vTurnOffAllRelays(void)
 {
-  eRELAY eWhichRelay;
-  
-  for( eWhichRelay = (eRELAY) 0; eWhichRelay < eRELAY_COUNT; eWhichRelay + 1U )
+  for( unsigned int j = 0; j < eRELAY_COUNT; j++ ) // turn off all relays
   {
-    pinMode( gxLookUpRelayConfig[eWhichRelay].u8EnablePin, INPUT );
-    pinMode( gxLookUpRelayConfig[eWhichRelay].u8TriggerPin, OUTPUT );
-    digitalWrite( gxLookUpRelayConfig[eWhichRelay].u8TriggerPin, CHARGER_DISCONNECTED ); // initialize all relays to be off
+    digitalWrite(gxLookUpRelayConfig[ j ].u8OutputPin, CHARGER_DISCONNECTED );
   }
 
-  return;
+#ifdef DEBUG
+  Serial.println( "All relays off" );
+#endif
+  
+  delay( 100 );// give some time for the relays to settle..
 }
