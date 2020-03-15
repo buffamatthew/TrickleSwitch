@@ -109,69 +109,55 @@ unsigned char u8GetEnableSwitchState( void )
 void loop() 
 {
   gu8CurrentSwitchState = u8GetEnableSwitchState();
-
-  if( gu8CurrentSwitchState != gu8LastSwitchState ) // handles sudden changes of 0 relays enabled to some enabled, or some enabled to 0 enabled.. don't want to wait for time to expire
+  
+  if( ( gu8LastSwitchState == 0 ) && ( gu8CurrentSwitchState != 0 ) )
   {
-    // switch state just changed
-    
-    if( 0U == gu8CurrentSwitchState )
+    for( unsigned int j = 0; j < eRELAY_COUNT; j++ )
     {
-      // changing from at least 1 relay enabled to 0 relays enabled
-      vTurnOffAllRelays();
-    }
-    else if( 0U == gu8LastSwitchState )
-    {
-      // changing from 0 relays enabled to at least 1 relay enabled..
-      for( unsigned int i = 0; i < eRELAY_COUNT; i++ ) // just find the first relay enabled and turn it on
+      if( digitalRead( gxLookUpRelayConfig[ i ].u8EnablePin ) == HIGH )
       {
-        if( digitalRead( gxLookUpRelayConfig[ i ].u8EnablePin ) == HIGH )
-        {
-          digitalWrite( gxLookUpRelayConfig[ i ].u8OutputPin, CHARGER_CONNECTED ); // all relays previously off, so don't need to turn any off
-          gu8LastRelayOn = i;
-
-#ifdef DEBUG
-          Serial.print("Relay ON = " );
-          Serial.println( gu8LastRelayOn );
-#endif          
-          gulTimeOfLastSwitch = millis();
-          break;
-        }
+        digitalWrite( gxLookUpRelayConfig[ i ].u8OutputPin, CHARGER_CONNECTED );
+        gu8LastRelayOn = i;
       }
     }
-    
-    gu8LastSwitchState = gu8CurrentSwitchState;
   }
-  
-  if( ( millis() - gulTimeOfLastSwitch ) >= ulGetSwitchPeriodMs() ) // handles periodic switching
+  else if( ( ( millis() - gulTimeOfLastSwitch ) >= ulGetSwitchPeriodMs() ) || digitalRead( gxLookUpRelayConfig[ gu8LastRelayOn ].u8EnablePin ) == LOW ) // if time expired or switch state changed
   {
-    // time to switch
-    gulTimeOfLastSwitch = millis();
-
+    
 #ifdef DEBUG
-    Serial.println( "Checking if we need to switch" );
-#endif          
+    Serial.println( "Time expired or the active relay suddenly disabled" );
+#endif
+
+    vTurnOffAllRelays();
+    
+    if( gu8CurrentSwitchState != gu8LastSwitchState )
+    {
+       gu8LastSwitchState = gu8CurrentSwitchState;
+    }
     
     i = 0;
     while( i < ( eRELAY_COUNT - 1) )
     {
-      if( digitalRead( gxLookUpRelayConfig[ ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT ].u8EnablePin ) == HIGH ) // loops through the last relay off + 1 (next relay in sequence) to find which one to turn on next
+      if( digitalRead( gxLookUpRelayConfig[ ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT ].u8EnablePin ) == HIGH ) // searches the next 3 enable switches to see which to turn on next
       {
-        vTurnOffAllRelays();
-        
         digitalWrite( gxLookUpRelayConfig[ ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT ].u8OutputPin, CHARGER_CONNECTED );
+        gulTimeOfLastSwitch = millis();
         
         gu8LastRelayOn = ( ( gu8LastRelayOn + i + 1 ) % eRELAY_COUNT );
 
 #ifdef DEBUG
         Serial.print("Relay ON = " );
         Serial.println( gu8LastRelayOn );
-#endif          
+#endif
         break;
       }
       
       i++;
     }
   }
+
+
+  gu8LastSwitchState = gu8CurrentSwitchState;
 
   delay(100);
 }
